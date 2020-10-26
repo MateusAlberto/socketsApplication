@@ -7,14 +7,14 @@ import (
 	"os"
 )
 
-//Cliente struct para definir um jogador real
-type Cliente struct {
+//JogadorReal struct para definir um jogador real
+type JogadorReal struct {
 	tabuleiroAtaque *Tabuleiro
 	tabuleiroDefesa *Tabuleiro
 }
 
 //NovoJogador construtor de um jogador real
-func (c *Cliente) NovoJogador() {
+func (c *JogadorReal) NovoJogador() {
 	tabDefesa := leTabuleiroArquivo()
 	c.tabuleiroAtaque = NovoTabDefesa(tabDefesa)
 	c.tabuleiroAtaque = NovoTabAtaque()
@@ -55,7 +55,7 @@ func leTabuleiroArquivo() [TamanhoTabuleiro][TamanhoTabuleiro]byte {
 }
 
 //Atirar função que realiza um tiro
-func (c *Cliente) Atirar() (int, int) {
+func (c *JogadorReal) Atirar() (int, int) {
 	var tiro string
 	fmt.Print("Digite seu tiro: ")
 	fmt.Scanf("%s", &tiro)
@@ -74,6 +74,6 @@ func (c *Cliente) Atirar() (int, int) {
 }
 
 //Ganhou função que indica se o jogador corrente ganhou
-func (c *Cliente) Ganhou() bool {
+func (c *JogadorReal) Ganhou() bool {
 	return c.tabuleiroAtaque.AfundouTodos()
 }

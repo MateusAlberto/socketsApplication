@@ -14,15 +14,15 @@ const quantidadeNaviosTanque = 2
 const quantidadeContraTorpedeiros = 3
 const quantidadeSubmarinos = 4
 
-//Servidor struct para definir um jogador real
-type Servidor struct {
+//JogadorBot struct para definir um jogador real
+type JogadorBot struct {
 	tabuleiroAtaque *Tabuleiro
 	tabuleiroDefesa *Tabuleiro
 	ultimoTiro      [2]int
 }
 
 //NovoJogador construtor de um jogador real
-func (s *Servidor) NovoJogador() {
+func (s *JogadorBot) NovoJogador() {
 	tabDefesa := gerarTabuleiroAleatorio()
 	s.tabuleiroAtaque = NovoTabDefesa(tabDefesa)
 	s.tabuleiroAtaque = NovoTabAtaque()
@@ -37,7 +37,7 @@ func gerarTabuleiroAleatorio() [TamanhoTabuleiro][TamanhoTabuleiro]byte {
 }
 
 //Atirar função que realiza um tiro
-func (s *Servidor) Atirar() (int, int) {
+func (s *JogadorBot) Atirar() (int, int) {
 	i := s.ultimoTiro[0]
 	j := s.ultimoTiro[1]
 
@@ -54,6 +54,6 @@ func (s *Servidor) Atirar() (int, int) {
 }
 
 //Ganhou função que indica se o jogador corrente ganhou
-func (s *Servidor) Ganhou() bool {
+func (s *JogadorBot) Ganhou() bool {
 	return s.tabuleiroAtaque.AfundouTodos()
 }
