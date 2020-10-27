@@ -93,23 +93,30 @@ func (cliente *Cliente) receber() {
 
 //Função que vai iniciar o jogo
 func (cliente *Cliente) iniciarJogo() {
-	//johnLennon := bufio.NewReader(os.Stdin)
+	johnLennon := bufio.NewReader(os.Stdin)
 	cliente.carregarTabuleiro()
-	cliente.jogador.ImprimirTabuleiros()
-	// for {
-
-	// 	fmt.Print("Digite para o servidor: ")
-	// 	mensagem, err := johnLennon.ReadString('\n')
-	// 	if err != io.EOF {
-	// 		cliente.socket.Write([]byte(strings.TrimRight(mensagem, "\n")))
-	// 	}
-	// 	cliente.receber()
-	// }
+	for {
+		exibirMenuJogo()
+		mensagem, _ := johnLennon.ReadString('\n')
+		mensagem = strings.Trim(strings.ToUpper(mensagem), " \r\n")
+		switch mensagem {
+		case "A":
+			fmt.Println("Atacando...")
+		case "P":
+			cliente.jogador.ImprimirTabuleiros()
+		case "R":
+			exibirRegras()
+		case "S":
+			fmt.Print("Saindo do jogo...\n\n")
+			return
+		}
+		cliente.receber()
+	}
 }
 
 func (cliente *Cliente) carregarTabuleiro() {
 	johnLennon := bufio.NewReader(os.Stdin)
-	fmt.Print("Primeiro, você deve posicionar seus navios no tabuleiro.\n",
+	fmt.Print("Por favor, posicione seus navios no tabuleiro em um arquivo de texto.\n",
 		"Coloque o caractere '-' para representar a água e 'N' para representar a parte de um navio.\n",
 		"Indique o nome do arquivo onde está o seu tabuleiro montado: ")
 	nomeArquivo, _ := johnLennon.ReadString('\n')
@@ -179,4 +186,14 @@ func exibirRegras() {
 		"Um exemplo de tiro é D7.\n\n",
 
 		"Ganha o primeiro jogador que derrubar todos os navios do oponente.\n\n")
+}
+
+func exibirMenuJogo() {
+	fmt.Print("\n------ MENU BATALHA NAVAL ------\n",
+		"Digite sua opção:\n",
+		"a - Atacar\n",
+		"p - Imprimir Tabuleiros\n",
+		"r - Exibir Regras\n",
+		"s - Sair do jogo\n\n",
+		"Digite sua opção: ")
 }
