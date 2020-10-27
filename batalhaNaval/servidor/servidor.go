@@ -73,7 +73,7 @@ func (servidor *Servidor) receber(cliente net.Conn) {
 			break
 		}
 		if tamMensagem > 0 {
-			fmt.Println("Recebido do cliente:", string(mensagem))
+			fmt.Println("Recebido do cliente:", string(mensagem), len(mensagem))
 			servidor.enviar(cliente, mensagem)
 		}
 	}
