@@ -10,30 +10,6 @@ type JogadorReal struct {
 	tabuleiroDefesa *Tabuleiro
 }
 
-//Atirar função que realiza um tiro
-func (jogador *JogadorReal) Atirar() (int, int) {
-	var tiro string
-	fmt.Print("Digite seu tiro: ")
-	fmt.Scanf("%s", &tiro)
-
-	var i, j int
-	i = int(tiro[0] - 'A')
-	if len(tiro) > 2 {
-		j = 9
-	} else {
-		j = int(tiro[1] - '1')
-	}
-
-	//EnviarTiro()
-
-	return i, j
-}
-
-//Ganhou função que indica se o jogador corrente ganhou
-func (jogador *JogadorReal) Ganhou() bool {
-	return jogador.tabuleiroAtaque.AfundouTodos()
-}
-
 //IniciarJogador inicia um jogador real colocando seus tabuleiros
 func (jogador *JogadorReal) IniciarJogador(tabuleiro [][]byte) {
 	tabDefesa := tabuleiro
@@ -52,4 +28,9 @@ func (jogador *JogadorReal) ImprimirTabuleiros() {
 	jogador.tabuleiroAtaque.Imprimir()
 	fmt.Print("\nSeu tabuleiro de Defesa:\n\n")
 	jogador.tabuleiroDefesa.Imprimir()
+}
+
+//Ganhou função que indica se o jogador corrente ganhou
+func (jogador *JogadorReal) Ganhou() bool {
+	return jogador.tabuleiroAtaque.AfundouTodos()
 }

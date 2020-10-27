@@ -101,16 +101,20 @@ func (cliente *Cliente) iniciarJogo() {
 		mensagem = strings.Trim(strings.ToUpper(mensagem), " \r\n")
 		switch mensagem {
 		case "A":
-			fmt.Println("Atacando...")
+			fmt.Print("Digite seu tiro: ")
+			tiro, _ := johnLennon.ReadString('\n')
+			tiro = "tiro: " + strings.Trim(strings.ToUpper(tiro), " \r\n")
+			fmt.Println("Seu tiro: ", tiro)
+			fmt.Println(len(tiro))
 		case "P":
 			cliente.jogador.ImprimirTabuleiros()
 		case "R":
 			exibirRegras()
 		case "S":
-			fmt.Print("Saindo do jogo...\n\n")
+			fmt.Print("\nSaindo do jogo...\n\n")
 			return
 		}
-		cliente.receber()
+		//cliente.receber()
 	}
 }
 
@@ -196,4 +200,23 @@ func exibirMenuJogo() {
 		"r - Exibir Regras\n",
 		"s - Sair do jogo\n\n",
 		"Digite sua opção: ")
+}
+
+//Atirar função que realiza um tiro
+func lerTiro() (int, int) {
+	var tiro string
+	fmt.Print("Digite seu tiro: ")
+	fmt.Scanf("%s", &tiro)
+
+	var i, j int
+	i = int(tiro[0] - 'A')
+	if len(tiro) > 2 {
+		j = 9
+	} else {
+		j = int(tiro[1] - '1')
+	}
+
+	//EnviarTiro()
+
+	return i, j
 }
