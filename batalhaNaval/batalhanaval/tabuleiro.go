@@ -7,11 +7,11 @@ const TamanhoTabuleiro = 10
 
 //Tabuleiro struct para definir as operações de um tabuleiro
 type Tabuleiro struct {
-	tabuleiro [TamanhoTabuleiro][TamanhoTabuleiro]byte
+	tabuleiro [][]byte
 }
 
-//NovoTabDefesa construtor de um tabuleiro de uleiro
-func NovoTabDefesa(tabuleiro [TamanhoTabuleiro][TamanhoTabuleiro]byte) *Tabuleiro {
+//NovoTabDefesa construtor de um tabuleiro de defesa
+func NovoTabDefesa(tabuleiro [][]byte) *Tabuleiro {
 	tab := &Tabuleiro{}
 	tab.tabuleiro = tabuleiro
 	return tab
@@ -20,7 +20,9 @@ func NovoTabDefesa(tabuleiro [TamanhoTabuleiro][TamanhoTabuleiro]byte) *Tabuleir
 //NovoTabAtaque construtor de um tabuleiro de ataque
 func NovoTabAtaque() *Tabuleiro {
 	tab := &Tabuleiro{}
+	tab.tabuleiro = make([][]byte, TamanhoTabuleiro)
 	for i := 0; i < TamanhoTabuleiro; i++ {
+		tab.tabuleiro[i] = make([]byte, TamanhoTabuleiro)
 		for j := 0; j < TamanhoTabuleiro; j++ {
 			tab.tabuleiro[i][j] = '-'
 		}

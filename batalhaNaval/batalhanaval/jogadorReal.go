@@ -1,10 +1,7 @@
 package batalhanaval
 
 import (
-	"bufio"
 	"fmt"
-	"io"
-	"os"
 )
 
 //JogadorReal struct para definir um jogador real
@@ -13,49 +10,8 @@ type JogadorReal struct {
 	tabuleiroDefesa *Tabuleiro
 }
 
-//NovoJogador construtor de um jogador real
-func (c *JogadorReal) NovoJogador() {
-	tabDefesa := leTabuleiroArquivo()
-	c.tabuleiroAtaque = NovoTabDefesa(tabDefesa)
-	c.tabuleiroAtaque = NovoTabAtaque()
-}
-
-//leTabuleiroArquivo função que lê um tabuleiro de um arquivo
-func leTabuleiroArquivo() [TamanhoTabuleiro][TamanhoTabuleiro]byte {
-	var tabuleiro [TamanhoTabuleiro][TamanhoTabuleiro]byte
-	arquivo, err := os.Open("entrada.txt")
-
-	if err != nil {
-		fmt.Println("Ocorreu um erro:", err)
-		os.Exit(-1)
-	}
-
-	leitor := bufio.NewReader(arquivo)
-	i := 0
-	for {
-		linha, err := leitor.ReadBytes('\n')
-		pos := 0
-		j := 0
-		for pos < len(linha) {
-			if linha[pos] != ' ' {
-				tabuleiro[i][j] = linha[pos]
-				j++
-			}
-			pos++
-		}
-
-		if err == io.EOF {
-			break
-		}
-		i++
-	}
-
-	arquivo.Close()
-	return tabuleiro
-}
-
 //Atirar função que realiza um tiro
-func (c *JogadorReal) Atirar() (int, int) {
+func (jogador *JogadorReal) Atirar() (int, int) {
 	var tiro string
 	fmt.Print("Digite seu tiro: ")
 	fmt.Scanf("%s", &tiro)
@@ -74,6 +30,26 @@ func (c *JogadorReal) Atirar() (int, int) {
 }
 
 //Ganhou função que indica se o jogador corrente ganhou
-func (c *JogadorReal) Ganhou() bool {
-	return c.tabuleiroAtaque.AfundouTodos()
+func (jogador *JogadorReal) Ganhou() bool {
+	return jogador.tabuleiroAtaque.AfundouTodos()
+}
+
+//IniciarJogador inicia um jogador real colocando seus tabuleiros
+func (jogador *JogadorReal) IniciarJogador(tabuleiro [][]byte) {
+	tabDefesa := tabuleiro
+	jogador.tabuleiroDefesa = NovoTabDefesa(tabDefesa)
+	jogador.tabuleiroAtaque = NovoTabAtaque()
+}
+
+//ImprimirTabuleiros Imprime os dois tabuleiros do jogador
+func (jogador *JogadorReal) ImprimirTabuleiros() {
+	fmt.Print("\nLEGENDA:\n",
+		" - : Água\n",
+		" N : Parte de um Navio\n",
+		" X : Tiro na Água\n",
+		" V : Tiro Certeiro\n\n",
+		"Seu tabuleiro de Ataque:\n\n")
+	jogador.tabuleiroAtaque.Imprimir()
+	fmt.Print("\nSeu tabuleiro de Defesa:\n\n")
+	jogador.tabuleiroDefesa.Imprimir()
 }

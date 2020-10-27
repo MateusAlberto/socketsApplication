@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"socketsApplication/batalhaNaval/batalhanaval"
 	"strings"
 )
 
@@ -36,14 +37,14 @@ func main() {
 		if err == io.EOF {
 			return //se deu EOF na leitura padrão, é porque o programa cliente foi fechado
 		}
-		var opcao byte = strings.ToUpper(strings.Trim(mensagem, " \n"))[0]
+		opcao := strings.ToUpper(strings.Trim(mensagem, " \r\n"))
 		switch opcao {
-		case 'I':
+		case "I":
 			cliente.iniciarJogo()
-			fmt.Println("Iniciar Jogo")
-		case 'R':
+			fmt.Println("\nIniciar Jogo")
+		case "R":
 			exibirRegras()
-		case 'D':
+		case "D":
 			fmt.Println("Obrigado por jogar Batalha Naval!")
 			return //vai fechar o socket por causa do comando defer
 		default:
@@ -55,63 +56,95 @@ func main() {
 
 //Cliente struct que define um cliente para se conectar no servidor via TCP
 type Cliente struct {
-	socket net.Conn
+	socket  net.Conn
+	jogador batalhanaval.JogadorReal
 }
+
+//Funçao que rodará em paralelo e vai ser responsável por receber os dados vindos do servidor
+// func (cliente *Cliente) receber() {
+// 	for {
+// 		mensagem := make([]byte, tamanhoMaxMensagem)
+// 		tamMensagem, err := cliente.socket.Read(mensagem)
+// 		//Se tiver algum erro, fecha a conexão
+// 		if err != nil {
+// 			fmt.Println("Ocorreu um erro de comunicação com o servidor:", err)
+// 			cliente.socket.Close()
+// 			break
+// 		}
+// 		if tamMensagem > 0 {
+// 			fmt.Println("Servidor:", string(mensagem))
+// 		}
+// 	}
+// }
 
 //Funçao que rodará em paralelo e vai ser responsável por receber os dados vindos do servidor
 func (cliente *Cliente) receber() {
-	for {
-		mensagem := make([]byte, tamanhoMaxMensagem)
-		tamMensagem, err := cliente.socket.Read(mensagem)
-		//Se tiver algum erro, fecha a conexão
-		if err != nil {
-			fmt.Println("Ocorreu um erro de comunicação com o servidor:", err)
-			cliente.socket.Close()
-			break
-		}
-		if tamMensagem > 0 {
-			fmt.Println("Servidor:", string(mensagem))
-		}
+	mensagem := make([]byte, tamanhoMaxMensagem)
+	tamMensagem, err := cliente.socket.Read(mensagem)
+	//Se tiver algum erro, fecha a conexão
+	if err != nil {
+		fmt.Println("Ocorreu um erro de comunicação com o servidor:", err)
+		cliente.socket.Close()
+	}
+	if tamMensagem > 0 {
+		fmt.Println("Servidor:", string(mensagem))
 	}
 }
-
-//Funçao que rodará em paralelo e vai ser responsável por receber os dados vindos do servidor
-// func (cliente *Cliente) receberUm() {
-// 	mensagem := make([]byte, tamanhoMaxMensagem)
-// 	tamMensagem, err := cliente.socket.Read(mensagem)
-// 	//Se tiver algum erro, fecha a conexão
-// 	if err != nil {
-// 		fmt.Println("Ocorreu um erro de comunicação com o servidor:", err)
-// 		cliente.socket.Close()
-// 	}
-// 	if tamMensagem > 0 {
-// 		fmt.Println("Servidor:", string(mensagem))
-// 	}
-// }
 
 //Função que vai iniciar o jogo
 func (cliente *Cliente) iniciarJogo() {
 	//johnLennon := bufio.NewReader(os.Stdin)
 	cliente.carregarTabuleiro()
-	for {
+	cliente.jogador.ImprimirTabuleiros()
+	// for {
 
-		// fmt.Print("Digite para o servidor: ")
-		// mensagem, err := johnLennon.ReadString('\n')
-		// if err != io.EOF {
-		// 	cliente.socket.Write([]byte(strings.TrimRight(mensagem, "\n")))
-		// }
-		// cliente.receber()
-	}
+	// 	fmt.Print("Digite para o servidor: ")
+	// 	mensagem, err := johnLennon.ReadString('\n')
+	// 	if err != io.EOF {
+	// 		cliente.socket.Write([]byte(strings.TrimRight(mensagem, "\n")))
+	// 	}
+	// 	cliente.receber()
+	// }
 }
 
 func (cliente *Cliente) carregarTabuleiro() {
+	johnLennon := bufio.NewReader(os.Stdin)
 	fmt.Print("Primeiro, você deve posicionar seus navios no tabuleiro.\n",
 		"Coloque o caractere '-' para representar a água e 'N' para representar a parte de um navio.\n",
 		"Indique o nome do arquivo onde está o seu tabuleiro montado: ")
+	nomeArquivo, _ := johnLennon.ReadString('\n')
+	nomeArquivo = strings.Trim(nomeArquivo, " \r\n")
+	tabuleiro := LeTabuleiroArquivo(nomeArquivo)
+	cliente.jogador.IniciarJogador(tabuleiro)
+}
+
+//LeTabuleiroArquivo função que lê um tabuleiro de um arquivo
+func LeTabuleiroArquivo(nomeArquivo string) [][]byte {
+	tabuleiro := make([][]byte, batalhanaval.TamanhoTabuleiro)
+	arquivo, err := os.Open(nomeArquivo)
+
+	if err != nil {
+		fmt.Println("Ocorreu um erro:", err)
+		os.Exit(-1)
+	}
+
+	leitor := bufio.NewReader(arquivo)
+	for i := 0; i < batalhanaval.TamanhoTabuleiro; i++ {
+		linha, err := leitor.ReadString('\n')
+		linha = strings.ReplaceAll((strings.Trim(linha, " \r\n")), " ", "")
+		tabuleiro[i] = []byte(linha)
+
+		if err == io.EOF {
+			break
+		}
+	}
+
+	arquivo.Close()
+	return tabuleiro
 }
 
 func exibirMenuPrincipal() {
-	fmt.Print("------ MENU PRINCIPAL ------\n",
+	fmt.Print("\n------ MENU PRINCIPAL ------\n",
 		"Digite os seguintes comandos:\n",
 		"i - Iniciar o jogo\n",
 		"r - Exibir Regras\n",
@@ -120,7 +153,7 @@ func exibirMenuPrincipal() {
 }
 
 func exibirRegras() {
-	fmt.Print("Batalha Naval é um jogo no qual dois jogadores posicionam 10 navios em um tabuleiro 10x10 e, em seguida, revesam turnos para atirarem com o objetivo de afundar um navio do oponente.\n",
+	fmt.Print("\nBatalha Naval é um jogo no qual dois jogadores posicionam 10 navios em um tabuleiro 10x10 e, em seguida, revesam turnos para atirarem com o objetivo de afundar um navio do oponente.\n",
 		"Os navios são os seguintes:\n",
 		"- 4 submarinos que ocupam 2 posições\n",
 		"- 3 contratorpedeiros que ocupam 3 posições\n",

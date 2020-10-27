@@ -31,8 +31,8 @@ func (s *JogadorBot) NovoJogador() {
 }
 
 //gerarTabuleiroAleatorio
-func gerarTabuleiroAleatorio() [TamanhoTabuleiro][TamanhoTabuleiro]byte {
-	var tab [10][10]byte
+func gerarTabuleiroAleatorio() [][]byte {
+	tab := make([][]byte, 10)
 	return tab
 }
 
