@@ -21,8 +21,8 @@ type JogadorBot struct {
 	ultimoTiro      [2]int
 }
 
-//NovoJogador construtor de um jogador real
-func (s *JogadorBot) NovoJogador() {
+//IniciarJogador construtor de um jogador real
+func (s *JogadorBot) IniciarJogador() {
 	tabDefesa := gerarTabuleiroAleatorio()
 	s.tabuleiroAtaque = NovoTabDefesa(tabDefesa)
 	s.tabuleiroAtaque = NovoTabAtaque()

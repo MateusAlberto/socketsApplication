@@ -40,8 +40,8 @@ func main() {
 		opcao := strings.ToUpper(strings.Trim(mensagem, " \r\n"))
 		switch opcao {
 		case "I":
-			cliente.iniciarJogo()
 			fmt.Println("\nIniciar Jogo")
+			cliente.iniciarJogo()
 		case "R":
 			exibirRegras()
 		case "D":
@@ -93,6 +93,11 @@ func (cliente *Cliente) receber() {
 
 //Função que vai iniciar o jogo
 func (cliente *Cliente) iniciarJogo() {
+	mensagemAEnviar := make([]byte, tamanhoMaxMensagem)
+	mensagemAEnviar = []byte("I")
+	cliente.socket.Write(mensagemAEnviar)
+	cliente.receber()
+
 	johnLennon := bufio.NewReader(os.Stdin)
 	cliente.carregarTabuleiro()
 	for {
@@ -102,25 +107,32 @@ func (cliente *Cliente) iniciarJogo() {
 		switch mensagem {
 		case "A":
 			fmt.Print("Digite seu tiro: ")
-			tiro, _ := johnLennon.ReadString('\n')
-			tiro = "tiro: " + strings.Trim(strings.ToUpper(tiro), " \r\n")
-			fmt.Println("Seu tiro: ", tiro)
-			fmt.Println(len(tiro))
+			tiro, _ := johnLennon.ReadBytes('\n')
+			tiroStr := strings.Trim(strings.ToUpper(string(tiro)), " \r\n")
+			fmt.Println("Seu tiro: ", tiroStr)
+			fmt.Println(len(tiroStr))
+			mensagemAEnviar = []byte("A " + tiroStr)
+			cliente.socket.Write(mensagemAEnviar)
+			cliente.receber()
 		case "P":
 			cliente.jogador.ImprimirTabuleiros()
 		case "R":
 			exibirRegras()
 		case "S":
 			fmt.Print("\nSaindo do jogo...\n\n")
+			mensagemAEnviar = []byte("S")
+			cliente.socket.Write(mensagemAEnviar)
+			cliente.receber()
 			return
+		default:
+			fmt.Println("\nPor favor, digite um comando correto")
 		}
-		//cliente.receber()
 	}
 }
 
 func (cliente *Cliente) carregarTabuleiro() {
 	johnLennon := bufio.NewReader(os.Stdin)
-	fmt.Print("Por favor, posicione seus navios no tabuleiro em um arquivo de texto.\n",
+	fmt.Print("\nPor favor, posicione seus navios no tabuleiro em um arquivo de texto.\n",
 		"Coloque o caractere '-' para representar a água e 'N' para representar a parte de um navio.\n",
 		"Indique o nome do arquivo onde está o seu tabuleiro montado: ")
 	nomeArquivo, _ := johnLennon.ReadString('\n')
