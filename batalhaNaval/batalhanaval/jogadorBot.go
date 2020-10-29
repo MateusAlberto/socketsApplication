@@ -6,16 +6,16 @@ import (
 
 //JogadorBot struct para definir um jogador real
 type JogadorBot struct {
-	tabuleiroAtaque *Tabuleiro
-	tabuleiroDefesa *Tabuleiro
+	TabuleiroAtaque *Tabuleiro
+	TabuleiroDefesa *Tabuleiro
 	ultimoTiro      [2]int
 }
 
 //IniciarJogador construtor de um jogador real
 func (jogador *JogadorBot) IniciarJogador() {
-	jogador.tabuleiroDefesa = NovoTabVazio()
-	jogador.tabuleiroDefesa.GerarTabuleiroAleatorio()
-	jogador.tabuleiroAtaque = NovoTabVazio()
+	jogador.TabuleiroDefesa = NovoTabVazio()
+	jogador.TabuleiroDefesa.GerarTabuleiroAleatorio()
+	jogador.TabuleiroAtaque = NovoTabVazio()
 	jogador.ultimoTiro[0] = rand.Int() % TamanhoTabuleiro
 	jogador.ultimoTiro[1] = rand.Int() % TamanhoTabuleiro
 }
@@ -27,7 +27,7 @@ func (jogador *JogadorBot) Atirar() (int, int) {
 
 	//parei aqui
 
-	for jogador.tabuleiroAtaque.tabuleiro[i][j] != '-' {
+	for jogador.TabuleiroAtaque.tabuleiro[i][j] != '-' {
 		jogador.ultimoTiro[0] = rand.Int() % TamanhoTabuleiro
 		jogador.ultimoTiro[1] = rand.Int() % TamanhoTabuleiro
 	}
@@ -39,5 +39,5 @@ func (jogador *JogadorBot) Atirar() (int, int) {
 
 //Ganhou função que indica se o jogador corrente ganhou
 func (jogador *JogadorBot) Ganhou() bool {
-	return jogador.tabuleiroAtaque.AfundouTodos()
+	return jogador.TabuleiroAtaque.AfundouTodos()
 }

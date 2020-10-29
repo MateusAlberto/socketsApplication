@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"socketsApplication/batalhaNaval/batalhanaval"
+	"strconv"
 	"strings"
 )
 
@@ -91,10 +92,11 @@ func (cliente *Cliente) receber() {
 	}
 }
 
-//Funçao que  vai receber um tiro do servidor
-func (cliente *Cliente) receberTiro() (int, int) {
+//Funçao que  vai receber a resposta do seu tiro e um tiro do servidor
+func (cliente *Cliente) receberTiro() (bool, int, int) {
 	mensagem := make([]byte, tamanhoMaxMensagem)
 	tamMensagem, err := cliente.socket.Read(mensagem)
+	acertou := false
 	x := -1
 	y := -1
 	//Se tiver algum erro, fecha a conexão
@@ -104,11 +106,21 @@ func (cliente *Cliente) receberTiro() (int, int) {
 	}
 	if tamMensagem > 0 {
 		mensagemStr := strings.Trim(string(mensagem), " \r\n")
-		fmt.Println("Servidor:", string(mensagem))
-		x, y = batalhanaval.ParseTiro(mensagemStr)
+		fmt.Println("Servidor:", mensagemStr)
+		if byte(mensagemStr[0]) == 1 {
+			acertou = true
+		}
+		x, y = batalhanaval.ParseTiro(mensagemStr[2:])
 		fmt.Printf("Tiro parseado: (%d, %d)\n", x, y)
 	}
-	return x, y
+
+	if acertou {
+		fmt.Println("Servidor: Tiro certeiro!")
+	} else {
+		fmt.Println("Servidor: Tiro na água!")
+	}
+
+	return acertou, x, y
 }
 
 //Função que vai iniciar o jogo
@@ -126,13 +138,30 @@ func (cliente *Cliente) iniciarJogo() {
 		mensagem = strings.Trim(strings.ToUpper(mensagem), " \r\n")
 		switch mensagem {
 		case "A":
+			//Enviando um tiro para o servidor
 			fmt.Print("Digite seu tiro: ")
 			tiro, _ := johnLennon.ReadString('\n')
 			tiro = strings.Trim(strings.ToUpper(tiro), " \r\n")
+			xCliente, yCliente := batalhanaval.ParseTiro(tiro)
 			mensagemAEnviar = []byte("A " + tiro)
 			cliente.socket.Write(mensagemAEnviar)
-			x, y := cliente.receberTiro()
-			cliente.jogador.RegistrarTiro()
+
+			//Recebendo tiro do servidor e resultado do tiro do cliente e enviando resultado do tiro do servidor
+			clienteAcertou, xServidor, yServidor := cliente.receberTiro()
+			cliente.jogador.TabuleiroAtaque.RegistrarTiro(clienteAcertou, xCliente, yCliente)
+			servidorAcertou := cliente.jogador.TabuleiroDefesa.ReceberTiro(xServidor, yServidor)
+
+			var acertouAEnviar string
+			if servidorAcertou {
+				fmt.Println("Seu oponente fez um tiro certeiro!")
+				acertouAEnviar = "1"
+			} else {
+				fmt.Println("Seu oponente fez um tiro na água!")
+				acertouAEnviar = "0"
+			}
+
+			mensagemAEnviar = []byte("T " + acertouAEnviar + strconv.Itoa(xServidor) + "," + strconv.Itoa(yServidor))
+			cliente.socket.Write(mensagemAEnviar)
 		case "P":
 			cliente.jogador.ImprimirTabuleiros()
 		case "R":
@@ -231,23 +260,4 @@ func exibirMenuJogo() {
 		"r - Exibir Regras\n",
 		"s - Sair do jogo\n\n",
 		"Digite sua opção: ")
-}
-
-//Atirar função que realiza um tiro
-func lerTiro() (int, int) {
-	var tiro string
-	fmt.Print("Digite seu tiro: ")
-	fmt.Scanf("%s", &tiro)
-
-	var i, j int
-	i = int(tiro[0] - 'A')
-	if len(tiro) > 2 {
-		j = 9
-	} else {
-		j = int(tiro[1] - '1')
-	}
-
-	//EnviarTiro()
-
-	return i, j
 }

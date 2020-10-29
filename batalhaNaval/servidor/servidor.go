@@ -101,13 +101,20 @@ func (servidor *Servidor) receber(cliente net.Conn) {
 			case 'I':
 				servidor.iniciarJogo <- cliente
 				mensagemAEnviar = []byte("Que vença o melhor.")
-				cliente.Write([]byte("Que vença o melhor."))
+				cliente.Write(mensagemAEnviar)
 			//comando para receber um tiro do cliente passado como parâmetro e em seguida atirar
 			case 'A':
 				//servidor.jogos[cliente].ReceberTiro()
 				mensagemAEnviar = []byte("Comando para atirar\nTiro na coordenada: " + strings.Trim(string(mensagem[2:tamMensagem]), " \r\n"))
 				fmt.Println(string(mensagemAEnviar))
 				cliente.Write(mensagemAEnviar)
+			//comando para receber o resultado do tiro do cliente
+			case 'T':
+				fmt.Println("Mensagem enviada:", string(mensagemAEnviar))
+				acertou := mensagem[2] == '1'
+				x := int(mensagem[4] - '0')
+				y := int(mensagem[6] - '0')
+				servidor.jogos[cliente].TabuleiroAtaque.RegistrarTiro(acertou, x, y)
 			//comando para encerrar o jogo com o cliente passado como parâmetro
 			case 'S':
 				servidor.encerrarJogo <- cliente

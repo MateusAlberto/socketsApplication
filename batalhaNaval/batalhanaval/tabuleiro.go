@@ -189,12 +189,12 @@ func (t *Tabuleiro) Imprimir() {
 //afundou um navio
 func (t *Tabuleiro) ReceberTiro(i, j int) bool {
 	acertou := t.tabuleiro[i][j] == 'N'
-	t.RegistrarTiro(i, j, acertou)
+	t.RegistrarTiro(acertou, i, j)
 	return acertou
 }
 
 //RegistrarTiro função que registra um tiro realizado já com o resultado se acertou ou não
-func (t *Tabuleiro) RegistrarTiro(i, j int, acertou bool) {
+func (t *Tabuleiro) RegistrarTiro(acertou bool, i, j int) {
 	if acertou {
 		t.tabuleiro[i][j] = 'V'
 	} else {

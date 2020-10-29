@@ -6,15 +6,15 @@ import (
 
 //JogadorReal struct para definir um jogador real
 type JogadorReal struct {
-	tabuleiroAtaque *Tabuleiro
-	tabuleiroDefesa *Tabuleiro
+	TabuleiroAtaque *Tabuleiro
+	TabuleiroDefesa *Tabuleiro
 }
 
 //IniciarJogador inicia um jogador real colocando seus tabuleiros
 func (jogador *JogadorReal) IniciarJogador(tabuleiro [][]byte) {
 	tabDefesa := tabuleiro
-	jogador.tabuleiroDefesa = NovoTabDefesa(tabDefesa)
-	jogador.tabuleiroAtaque = NovoTabVazio()
+	jogador.TabuleiroDefesa = NovoTabDefesa(tabDefesa)
+	jogador.TabuleiroAtaque = NovoTabVazio()
 }
 
 //ImprimirTabuleiros Imprime os dois tabuleiros do jogador
@@ -25,14 +25,14 @@ func (jogador *JogadorReal) ImprimirTabuleiros() {
 		" X : Tiro na Água\n",
 		" V : Tiro Certeiro\n\n",
 		"Seu tabuleiro de Ataque:\n\n")
-	jogador.tabuleiroAtaque.Imprimir()
+	jogador.TabuleiroAtaque.Imprimir()
 	fmt.Print("\nSeu tabuleiro de Defesa:\n\n")
-	jogador.tabuleiroDefesa.Imprimir()
+	jogador.TabuleiroDefesa.Imprimir()
 }
 
 //RegistrarTiro
 
 //Ganhou função que indica se o jogador corrente ganhou
 func (jogador *JogadorReal) Ganhou() bool {
-	return jogador.tabuleiroAtaque.AfundouTodos()
+	return jogador.TabuleiroAtaque.AfundouTodos()
 }
