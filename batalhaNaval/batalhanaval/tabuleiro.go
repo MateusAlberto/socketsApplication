@@ -3,6 +3,7 @@ package batalhanaval
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 )
 
 //Tamanhos dos navios
@@ -213,4 +214,29 @@ func (t *Tabuleiro) AfundouTodos() bool {
 		}
 	}
 	return true
+}
+
+//ParseTiro vai receber um tiro em string do tipo A5 e retornar um par de ints do tipo equivalente (0, 4)
+func ParseTiro(tiro string) (int, int) {
+	var x, y int
+	xStr := byte(tiro[0])
+	yStr := tiro[1:len(tiro)]
+	//Parse do x
+	if xStr >= 'A' && xStr <= 'J' {
+		x = int(xStr - 'A')
+	} else {
+		x = -1
+	}
+
+	var err error
+	//Parse do y
+	y, err = strconv.Atoi(yStr)
+	if err == nil {
+		if y >= 1 && y <= 10 {
+			y--
+		}
+	} else {
+		y = -1
+	}
+	return x, y
 }

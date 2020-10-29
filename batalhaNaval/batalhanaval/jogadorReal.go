@@ -30,6 +30,8 @@ func (jogador *JogadorReal) ImprimirTabuleiros() {
 	jogador.tabuleiroDefesa.Imprimir()
 }
 
+//RegistrarTiro
+
 //Ganhou função que indica se o jogador corrente ganhou
 func (jogador *JogadorReal) Ganhou() bool {
 	return jogador.tabuleiroAtaque.AfundouTodos()

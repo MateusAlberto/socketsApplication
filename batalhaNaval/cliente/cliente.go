@@ -91,6 +91,26 @@ func (cliente *Cliente) receber() {
 	}
 }
 
+//Funçao que  vai receber um tiro do servidor
+func (cliente *Cliente) receberTiro() (int, int) {
+	mensagem := make([]byte, tamanhoMaxMensagem)
+	tamMensagem, err := cliente.socket.Read(mensagem)
+	x := -1
+	y := -1
+	//Se tiver algum erro, fecha a conexão
+	if err != nil {
+		fmt.Println("Ocorreu um erro de comunicação com o servidor:", err)
+		cliente.socket.Close()
+	}
+	if tamMensagem > 0 {
+		mensagemStr := strings.Trim(string(mensagem), " \r\n")
+		fmt.Println("Servidor:", string(mensagem))
+		x, y = batalhanaval.ParseTiro(mensagemStr)
+		fmt.Printf("Tiro parseado: (%d, %d)\n", x, y)
+	}
+	return x, y
+}
+
 //Função que vai iniciar o jogo
 func (cliente *Cliente) iniciarJogo() {
 	mensagemAEnviar := make([]byte, tamanhoMaxMensagem)
@@ -111,7 +131,8 @@ func (cliente *Cliente) iniciarJogo() {
 			tiro = strings.Trim(strings.ToUpper(tiro), " \r\n")
 			mensagemAEnviar = []byte("A " + tiro)
 			cliente.socket.Write(mensagemAEnviar)
-			cliente.receber()
+			x, y := cliente.receberTiro()
+			cliente.jogador.RegistrarTiro()
 		case "P":
 			cliente.jogador.ImprimirTabuleiros()
 		case "R":
