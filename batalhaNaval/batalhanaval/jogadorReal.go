@@ -14,7 +14,7 @@ type JogadorReal struct {
 func (jogador *JogadorReal) IniciarJogador(tabuleiro [][]byte) {
 	tabDefesa := tabuleiro
 	jogador.tabuleiroDefesa = NovoTabDefesa(tabDefesa)
-	jogador.tabuleiroAtaque = NovoTabAtaque()
+	jogador.tabuleiroAtaque = NovoTabVazio()
 }
 
 //ImprimirTabuleiros Imprime os dois tabuleiros do jogador

@@ -85,9 +85,9 @@ func (servidor *Servidor) iniciar() {
 
 //Função que acontecerá o tempo todo em paralelo e será responsável por receber as mensagens dos clientes
 func (servidor *Servidor) receber(cliente net.Conn) {
+	mensagem := make([]byte, tamanhoMaxMensagem)
+	mensagemAEnviar := make([]byte, tamanhoMaxMensagem)
 	for {
-		mensagem := make([]byte, tamanhoMaxMensagem)
-		mensagemAEnviar := make([]byte, tamanhoMaxMensagem)
 		tamMensagem, err := cliente.Read(mensagem)
 		if err != nil {
 			servidor.descadastrar <- cliente
@@ -101,7 +101,7 @@ func (servidor *Servidor) receber(cliente net.Conn) {
 			case 'I':
 				servidor.iniciarJogo <- cliente
 				mensagemAEnviar = []byte("Que vença o melhor.")
-				cliente.Write(mensagemAEnviar)
+				cliente.Write([]byte("Que vença o melhor."))
 			//comando para receber um tiro do cliente passado como parâmetro e em seguida atirar
 			case 'A':
 				//servidor.jogos[cliente].ReceberTiro()

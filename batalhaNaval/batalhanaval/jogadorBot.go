@@ -1,18 +1,8 @@
 package batalhanaval
 
-import "math/rand"
-
-//Tamanhos dos navios
-const tamanhoPortaAvioes = 5
-const tamanhoNaviosTanque = 4
-const tamanhoContraTorpedeiros = 3
-const tamanhoSubmarinos = 2
-
-//Quantidades dos navios
-const quantidadePortaAvioes = 1
-const quantidadeNaviosTanque = 2
-const quantidadeContraTorpedeiros = 3
-const quantidadeSubmarinos = 4
+import (
+	"math/rand"
+)
 
 //JogadorBot struct para definir um jogador real
 type JogadorBot struct {
@@ -22,30 +12,24 @@ type JogadorBot struct {
 }
 
 //IniciarJogador construtor de um jogador real
-func (s *JogadorBot) IniciarJogador() {
-	tabDefesa := gerarTabuleiroAleatorio()
-	s.tabuleiroAtaque = NovoTabDefesa(tabDefesa)
-	s.tabuleiroAtaque = NovoTabAtaque()
-	s.ultimoTiro[0] = rand.Int() % TamanhoTabuleiro
-	s.ultimoTiro[1] = rand.Int() % TamanhoTabuleiro
-}
-
-//gerarTabuleiroAleatorio
-func gerarTabuleiroAleatorio() [][]byte {
-	tab := make([][]byte, 10)
-	return tab
+func (jogador *JogadorBot) IniciarJogador() {
+	jogador.tabuleiroDefesa = NovoTabVazio()
+	jogador.tabuleiroDefesa.GerarTabuleiroAleatorio()
+	jogador.tabuleiroAtaque = NovoTabVazio()
+	jogador.ultimoTiro[0] = rand.Int() % TamanhoTabuleiro
+	jogador.ultimoTiro[1] = rand.Int() % TamanhoTabuleiro
 }
 
 //Atirar função que realiza um tiro
-func (s *JogadorBot) Atirar() (int, int) {
-	i := s.ultimoTiro[0]
-	j := s.ultimoTiro[1]
+func (jogador *JogadorBot) Atirar() (int, int) {
+	i := jogador.ultimoTiro[0]
+	j := jogador.ultimoTiro[1]
 
 	//parei aqui
 
-	for s.tabuleiroAtaque.tabuleiro[i][j] != '-' {
-		s.ultimoTiro[0] = rand.Int() % TamanhoTabuleiro
-		s.ultimoTiro[1] = rand.Int() % TamanhoTabuleiro
+	for jogador.tabuleiroAtaque.tabuleiro[i][j] != '-' {
+		jogador.ultimoTiro[0] = rand.Int() % TamanhoTabuleiro
+		jogador.ultimoTiro[1] = rand.Int() % TamanhoTabuleiro
 	}
 
 	//EnviarTiro()
@@ -54,6 +38,6 @@ func (s *JogadorBot) Atirar() (int, int) {
 }
 
 //Ganhou função que indica se o jogador corrente ganhou
-func (s *JogadorBot) Ganhou() bool {
-	return s.tabuleiroAtaque.AfundouTodos()
+func (jogador *JogadorBot) Ganhou() bool {
+	return jogador.tabuleiroAtaque.AfundouTodos()
 }

@@ -77,7 +77,7 @@ type Cliente struct {
 // 	}
 // }
 
-//Funçao que rodará em paralelo e vai ser responsável por receber os dados vindos do servidor
+//Funçao que  vai ser responsável por receber os dados vindos do servidor
 func (cliente *Cliente) receber() {
 	mensagem := make([]byte, tamanhoMaxMensagem)
 	tamMensagem, err := cliente.socket.Read(mensagem)
@@ -107,11 +107,9 @@ func (cliente *Cliente) iniciarJogo() {
 		switch mensagem {
 		case "A":
 			fmt.Print("Digite seu tiro: ")
-			tiro, _ := johnLennon.ReadBytes('\n')
-			tiroStr := strings.Trim(strings.ToUpper(string(tiro)), " \r\n")
-			fmt.Println("Seu tiro: ", tiroStr)
-			fmt.Println(len(tiroStr))
-			mensagemAEnviar = []byte("A " + tiroStr)
+			tiro, _ := johnLennon.ReadString('\n')
+			tiro = strings.Trim(strings.ToUpper(tiro), " \r\n")
+			mensagemAEnviar = []byte("A " + tiro)
 			cliente.socket.Write(mensagemAEnviar)
 			cliente.receber()
 		case "P":
@@ -178,10 +176,10 @@ func exibirMenuPrincipal() {
 func exibirRegras() {
 	fmt.Print("\nBatalha Naval é um jogo no qual dois jogadores posicionam 10 navios em um tabuleiro 10x10 e, em seguida, revesam turnos para atirarem com o objetivo de afundar um navio do oponente.\n",
 		"Os navios são os seguintes:\n",
-		"- 4 submarinos que ocupam 2 posições\n",
-		"- 3 contratorpedeiros que ocupam 3 posições\n",
-		"- 2 navios-tanque que ocupam 4 posições\n",
-		"- 1 porta-aviões que ocupa 5 posições\n\n",
+		"  - 1 porta-aviões que ocupa 5 posições\n",
+		"  - 2 navios-tanque que ocupam 4 posições\n",
+		"  - 3 contratorpedeiros que ocupam 3 posições\n",
+		"  - 4 submarinos que ocupam 2 posições\n\n",
 
 		"Os navios devem ser posicionados sempre na na horizontal ou na vertical, nunca na diagonal.\n",
 		"Um exemplo de tabuleiro corretamente posicionado é o seguinte:\n",

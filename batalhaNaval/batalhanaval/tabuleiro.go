@@ -1,6 +1,31 @@
 package batalhanaval
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
+
+//Tamanhos dos navios
+const tamPortaAvioes = 5
+const tamNaviosTanque = 4
+const tamContraTorpedeiros = 3
+const tamSubmarinos = 2
+
+//Quantidades dos navios
+const quantPortaAvioes = 1
+const quantNaviosTanque = 2
+const quantContraTorpedeiros = 3
+const quantSubmarinos = 4
+
+//enum para as direções
+type orientacao int
+
+const (
+	oeste orientacao = iota
+	norte
+	leste
+	sul
+)
 
 //TamanhoTabuleiro tamanho do tabuleiro
 const TamanhoTabuleiro = 10
@@ -17,8 +42,8 @@ func NovoTabDefesa(tabuleiro [][]byte) *Tabuleiro {
 	return tab
 }
 
-//NovoTabAtaque construtor de um tabuleiro de ataque
-func NovoTabAtaque() *Tabuleiro {
+//NovoTabVazio construtor de um tabuleiro de ataque
+func NovoTabVazio() *Tabuleiro {
 	tab := &Tabuleiro{}
 	tab.tabuleiro = make([][]byte, TamanhoTabuleiro)
 	for i := 0; i < TamanhoTabuleiro; i++ {
@@ -28,6 +53,116 @@ func NovoTabAtaque() *Tabuleiro {
 		}
 	}
 	return tab
+}
+
+//GerarTabuleiroAleatorio gera um tabuleiro aleatório para um jogador bot
+func (t *Tabuleiro) GerarTabuleiroAleatorio() {
+	quantNavios := []int{quantPortaAvioes, quantNaviosTanque, quantContraTorpedeiros, quantSubmarinos}
+	tamNavios := []int{tamPortaAvioes, tamNaviosTanque, tamContraTorpedeiros, tamSubmarinos}
+	for i, quant := range quantNavios {
+		for j := 0; j < quant; j++ {
+			t.colocarNavio(tamNavios[i])
+		}
+	}
+}
+
+//Função para colocar um navio numa posição aleatória do tabuleiro
+func (t *Tabuleiro) colocarNavio(tamanhoNavio int) {
+	var x, y int
+	var direcao orientacao
+	colocou := false
+
+	for !colocou {
+		x = rand.Int() % TamanhoTabuleiro
+		y = rand.Int() % TamanhoTabuleiro
+		//se já tem um navio
+		if t.tabuleiro[x][y] != 'N' {
+
+			switch {
+			//Ver se consegue colocar a oeste
+			case x-tamanhoNavio >= 0:
+				direcao = oeste
+				//verifica se todo o espaço para o navio está liberado. Se estiver, já coloca o navio
+				if t.espacoLiberado(x, y, tamanhoNavio, direcao) {
+					colocou = true
+				}
+			//Ver se consegue colocar ao norte
+			case y+tamanhoNavio < TamanhoTabuleiro:
+				direcao = norte
+				//verifica se todo o espaço para o navio está liberado. Se estiver, já coloca o navio
+				if t.espacoLiberado(x, y, tamanhoNavio, direcao) {
+					colocou = true
+				}
+			//Ver se consegue colocar a leste
+			case x+tamanhoNavio < TamanhoTabuleiro:
+				direcao = leste
+				//verifica se todo o espaço para o navio está liberado. Se estiver, já coloca o navio
+				if t.espacoLiberado(x, y, tamanhoNavio, direcao) {
+					colocou = true
+				}
+			//Ver se consegue colocar ao sul
+			case y-tamanhoNavio >= 0:
+				direcao = sul
+				//verifica se todo o espaço para o navio está liberado. Se estiver, já coloca o navio
+				if t.espacoLiberado(x, y, tamanhoNavio, direcao) {
+					colocou = true
+				}
+			}
+		}
+	}
+}
+
+//verifica se todo o espaço para o navio está liberado. Se estiver, já coloca o navio
+//já foi previamente verificado se na direção e coordenada passada, iria sair do tabuleiro pelo tamanho do navio
+func (t *Tabuleiro) espacoLiberado(x, y, tamanhoNavio int, direcao orientacao) bool {
+	switch direcao {
+	case oeste:
+		for i := x; i > x-tamanhoNavio; i-- {
+			if t.tabuleiro[i][y] == 'N' {
+				return false
+			}
+		}
+	case norte:
+		for j := y; j < y+tamanhoNavio; j++ {
+			if t.tabuleiro[x][j] == 'N' {
+				return false
+			}
+		}
+	case leste:
+		for i := x; i < x+tamanhoNavio; i++ {
+			if t.tabuleiro[i][y] == 'N' {
+				return false
+			}
+		}
+	case sul:
+		for j := y; j > y-tamanhoNavio; j-- {
+			if t.tabuleiro[x][j] == 'N' {
+				return false
+			}
+		}
+	}
+
+	//Se chegou até aqui, é porque pode colocar
+	//Vai colocar e retornar verdadeiro
+	switch direcao {
+	case oeste:
+		for i := x; i > x-tamanhoNavio; i-- {
+			t.tabuleiro[i][y] = 'N'
+		}
+	case norte:
+		for j := y; j < y+tamanhoNavio; j++ {
+			t.tabuleiro[x][j] = 'N'
+		}
+	case leste:
+		for i := x; i < x+tamanhoNavio; i++ {
+			t.tabuleiro[i][y] = 'N'
+		}
+	case sul:
+		for j := y; j > y-tamanhoNavio; j-- {
+			t.tabuleiro[x][j] = 'N'
+		}
+	}
+	return true
 }
 
 //Imprimir função que imprime o tabuleiro corrente
