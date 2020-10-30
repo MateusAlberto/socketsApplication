@@ -29,10 +29,3 @@ func (jogador *JogadorReal) ImprimirTabuleiros() {
 	fmt.Print("\nSeu tabuleiro de Defesa:\n\n")
 	jogador.TabuleiroDefesa.Imprimir()
 }
-
-//RegistrarTiro
-
-//Ganhou função que indica se o jogador corrente ganhou
-func (jogador *JogadorReal) Ganhou() bool {
-	return jogador.TabuleiroAtaque.AfundouTodos()
-}

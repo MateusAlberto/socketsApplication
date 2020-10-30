@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"time"
 )
 
 //Tamanhos dos navios
@@ -18,7 +19,7 @@ const quantNaviosTanque = 2
 const quantContraTorpedeiros = 3
 const quantSubmarinos = 4
 
-//enum para as direções
+//orientacao enum para as direções
 type orientacao int
 
 const (
@@ -69,43 +70,49 @@ func (t *Tabuleiro) GerarTabuleiroAleatorio() {
 
 //Função para colocar um navio numa posição aleatória do tabuleiro
 func (t *Tabuleiro) colocarNavio(tamanhoNavio int) {
-	var x, y int
+	var i, j int
 	var direcao orientacao
 	colocou := false
+	seed := rand.NewSource(time.Now().UnixNano())
+	random := rand.New(seed)
 
 	for !colocou {
-		x = rand.Int() % TamanhoTabuleiro
-		y = rand.Int() % TamanhoTabuleiro
+		seed = rand.NewSource(time.Now().UnixNano())
+		random = rand.New(seed)
+		i = random.Intn(TamanhoTabuleiro)
+		seed = rand.NewSource(time.Now().UnixNano())
+		random = rand.New(seed)
+		j = random.Intn(TamanhoTabuleiro)
 		//se já tem um navio
-		if t.tabuleiro[x][y] != 'N' {
+		if t.tabuleiro[i][j] != 'N' {
 
 			switch {
 			//Ver se consegue colocar a oeste
-			case x-tamanhoNavio >= 0:
+			case i-tamanhoNavio >= 0:
 				direcao = oeste
 				//verifica se todo o espaço para o navio está liberado. Se estiver, já coloca o navio
-				if t.espacoLiberado(x, y, tamanhoNavio, direcao) {
+				if t.espacoLiberado(i, j, tamanhoNavio, direcao) {
 					colocou = true
 				}
 			//Ver se consegue colocar ao norte
-			case y+tamanhoNavio < TamanhoTabuleiro:
+			case j+tamanhoNavio < TamanhoTabuleiro:
 				direcao = norte
 				//verifica se todo o espaço para o navio está liberado. Se estiver, já coloca o navio
-				if t.espacoLiberado(x, y, tamanhoNavio, direcao) {
+				if t.espacoLiberado(i, j, tamanhoNavio, direcao) {
 					colocou = true
 				}
 			//Ver se consegue colocar a leste
-			case x+tamanhoNavio < TamanhoTabuleiro:
+			case i+tamanhoNavio < TamanhoTabuleiro:
 				direcao = leste
 				//verifica se todo o espaço para o navio está liberado. Se estiver, já coloca o navio
-				if t.espacoLiberado(x, y, tamanhoNavio, direcao) {
+				if t.espacoLiberado(i, j, tamanhoNavio, direcao) {
 					colocou = true
 				}
 			//Ver se consegue colocar ao sul
-			case y-tamanhoNavio >= 0:
+			case j-tamanhoNavio >= 0:
 				direcao = sul
 				//verifica se todo o espaço para o navio está liberado. Se estiver, já coloca o navio
-				if t.espacoLiberado(x, y, tamanhoNavio, direcao) {
+				if t.espacoLiberado(i, j, tamanhoNavio, direcao) {
 					colocou = true
 				}
 			}
@@ -115,29 +122,29 @@ func (t *Tabuleiro) colocarNavio(tamanhoNavio int) {
 
 //verifica se todo o espaço para o navio está liberado. Se estiver, já coloca o navio
 //já foi previamente verificado se na direção e coordenada passada, iria sair do tabuleiro pelo tamanho do navio
-func (t *Tabuleiro) espacoLiberado(x, y, tamanhoNavio int, direcao orientacao) bool {
+func (t *Tabuleiro) espacoLiberado(i, j, tamanhoNavio int, direcao orientacao) bool {
 	switch direcao {
 	case oeste:
-		for i := x; i > x-tamanhoNavio; i-- {
-			if t.tabuleiro[i][y] == 'N' {
+		for c := i; c > i-tamanhoNavio; c-- {
+			if t.tabuleiro[c][j] == 'N' {
 				return false
 			}
 		}
 	case norte:
-		for j := y; j < y+tamanhoNavio; j++ {
-			if t.tabuleiro[x][j] == 'N' {
+		for c := j; c < j+tamanhoNavio; c++ {
+			if t.tabuleiro[i][c] == 'N' {
 				return false
 			}
 		}
 	case leste:
-		for i := x; i < x+tamanhoNavio; i++ {
-			if t.tabuleiro[i][y] == 'N' {
+		for c := i; c < i+tamanhoNavio; c++ {
+			if t.tabuleiro[c][j] == 'N' {
 				return false
 			}
 		}
 	case sul:
-		for j := y; j > y-tamanhoNavio; j-- {
-			if t.tabuleiro[x][j] == 'N' {
+		for c := j; c > j-tamanhoNavio; c-- {
+			if t.tabuleiro[i][c] == 'N' {
 				return false
 			}
 		}
@@ -147,20 +154,20 @@ func (t *Tabuleiro) espacoLiberado(x, y, tamanhoNavio int, direcao orientacao) b
 	//Vai colocar e retornar verdadeiro
 	switch direcao {
 	case oeste:
-		for i := x; i > x-tamanhoNavio; i-- {
-			t.tabuleiro[i][y] = 'N'
+		for c := i; c > i-tamanhoNavio; c-- {
+			t.tabuleiro[c][j] = 'N'
 		}
 	case norte:
-		for j := y; j < y+tamanhoNavio; j++ {
-			t.tabuleiro[x][j] = 'N'
+		for c := j; c < j+tamanhoNavio; c++ {
+			t.tabuleiro[i][c] = 'N'
 		}
 	case leste:
-		for i := x; i < x+tamanhoNavio; i++ {
-			t.tabuleiro[i][y] = 'N'
+		for c := i; c < i+tamanhoNavio; c++ {
+			t.tabuleiro[c][j] = 'N'
 		}
 	case sul:
-		for j := y; j > y-tamanhoNavio; j-- {
-			t.tabuleiro[x][j] = 'N'
+		for c := j; c > j-tamanhoNavio; c-- {
+			t.tabuleiro[i][c] = 'N'
 		}
 	}
 	return true
@@ -184,11 +191,9 @@ func (t *Tabuleiro) Imprimir() {
 	}
 }
 
-//ReceberTiro função que do tabuleiro de uleiro
-//que recebe um tiro e verifica se acertou e se
-//afundou um navio
+//ReceberTiro função que que recebe um tiro e verifica se acertou
 func (t *Tabuleiro) ReceberTiro(i, j int) bool {
-	acertou := t.tabuleiro[i][j] == 'N'
+	acertou := t.tabuleiro[i][j] == 'N' || t.tabuleiro[i][j] == 'V' //Assim, o jogador vai poder repetir o tiro que deu (isso fica a critério dele)
 	t.RegistrarTiro(acertou, i, j)
 	return acertou
 }
@@ -218,25 +223,30 @@ func (t *Tabuleiro) AfundouTodos() bool {
 
 //ParseTiro vai receber um tiro em string do tipo A5 e retornar um par de ints do tipo equivalente (0, 4)
 func ParseTiro(tiro string) (int, int) {
-	var x, y int
-	xStr := byte(tiro[0])
-	yStr := tiro[1:len(tiro)]
-	//Parse do x
-	if xStr >= 'A' && xStr <= 'J' {
-		x = int(xStr - 'A')
+	var i, j int
+	iStr := byte(tiro[0])
+	jStr := tiro[1:len(tiro)]
+	//Parse do i
+	if iStr >= 'A' && iStr <= 'J' {
+		i = int(iStr - 'A')
 	} else {
-		x = -1
+		i = -1
 	}
 
 	var err error
-	//Parse do y
-	y, err = strconv.Atoi(yStr)
+	//Parse do j
+	j, err = strconv.Atoi(jStr)
 	if err == nil {
-		if y >= 1 && y <= 10 {
-			y--
+		if j >= 1 && j <= 10 {
+			j--
 		}
 	} else {
-		y = -1
+		j = -1
 	}
-	return x, y
+	return i, j
+}
+
+//PosicaoDesconhecida retorna verdadeiro se a posição representar água e falso caso contrário
+func (t *Tabuleiro) PosicaoDesconhecida(i, j int) bool {
+	return t.tabuleiro[i][j] == '-'
 }

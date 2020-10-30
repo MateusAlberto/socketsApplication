@@ -61,23 +61,6 @@ type Cliente struct {
 	jogador batalhanaval.JogadorReal
 }
 
-//Funçao que rodará em paralelo e vai ser responsável por receber os dados vindos do servidor
-// func (cliente *Cliente) receber() {
-// 	for {
-// 		mensagem := make([]byte, tamanhoMaxMensagem)
-// 		tamMensagem, err := cliente.socket.Read(mensagem)
-// 		//Se tiver algum erro, fecha a conexão
-// 		if err != nil {
-// 			fmt.Println("Ocorreu um erro de comunicação com o servidor:", err)
-// 			cliente.socket.Close()
-// 			break
-// 		}
-// 		if tamMensagem > 0 {
-// 			fmt.Println("Servidor:", string(mensagem))
-// 		}
-// 	}
-// }
-
 //Funçao que  vai ser responsável por receber os dados vindos do servidor
 func (cliente *Cliente) receber() {
 	mensagem := make([]byte, tamanhoMaxMensagem)
@@ -88,39 +71,44 @@ func (cliente *Cliente) receber() {
 		cliente.socket.Close()
 	}
 	if tamMensagem > 0 {
-		fmt.Println("Servidor:", string(mensagem))
+		fmt.Println("\nServidor:", string(mensagem))
 	}
 }
 
-//Funçao que  vai receber a resposta do seu tiro e um tiro do servidor
-func (cliente *Cliente) receberTiro() (bool, int, int) {
+//Funçao que vai receber a resposta do seu tiro e um tiro do servidor
+func (cliente *Cliente) receberTiro() (bool, bool, int, int) {
 	mensagem := make([]byte, tamanhoMaxMensagem)
 	tamMensagem, err := cliente.socket.Read(mensagem)
 	acertou := false
-	x := -1
-	y := -1
+	ganhou := false
+	i := -1
+	j := -1
 	//Se tiver algum erro, fecha a conexão
 	if err != nil {
 		fmt.Println("Ocorreu um erro de comunicação com o servidor:", err)
 		cliente.socket.Close()
 	}
 	if tamMensagem > 0 {
-		mensagemStr := strings.Trim(string(mensagem), " \r\n")
-		fmt.Println("Servidor:", mensagemStr)
-		if byte(mensagemStr[0]) == 1 {
-			acertou = true
+		if mensagem[0] == '1' {
+			ganhou = true
+			fmt.Println("\nServidor: Tiro certeiro!\n\nParabéns! Você ganhou!")
+		} else {
+			if mensagem[2] == '1' {
+				acertou = true
+			}
+			i = int(mensagem[4] - '0')
+			j = int(mensagem[6] - '0')
 		}
-		x, y = batalhanaval.ParseTiro(mensagemStr[2:])
-		fmt.Printf("Tiro parseado: (%d, %d)\n", x, y)
 	}
 
-	if acertou {
-		fmt.Println("Servidor: Tiro certeiro!")
-	} else {
-		fmt.Println("Servidor: Tiro na água!")
+	if !ganhou {
+		if acertou {
+			fmt.Println("\nServidor: Tiro certeiro!")
+		} else {
+			fmt.Println("\nServidor: Tiro na água!")
+		}
 	}
-
-	return acertou, x, y
+	return ganhou, acertou, i, j
 }
 
 //Função que vai iniciar o jogo
@@ -133,6 +121,7 @@ func (cliente *Cliente) iniciarJogo() {
 	johnLennon := bufio.NewReader(os.Stdin)
 	cliente.carregarTabuleiro()
 	for {
+		zerarBuffer(mensagemAEnviar)
 		exibirMenuJogo()
 		mensagem, _ := johnLennon.ReadString('\n')
 		mensagem = strings.Trim(strings.ToUpper(mensagem), " \r\n")
@@ -142,26 +131,47 @@ func (cliente *Cliente) iniciarJogo() {
 			fmt.Print("Digite seu tiro: ")
 			tiro, _ := johnLennon.ReadString('\n')
 			tiro = strings.Trim(strings.ToUpper(tiro), " \r\n")
-			xCliente, yCliente := batalhanaval.ParseTiro(tiro)
-			mensagemAEnviar = []byte("A " + tiro)
-			cliente.socket.Write(mensagemAEnviar)
+			iCliente, jCliente := batalhanaval.ParseTiro(tiro)
 
-			//Recebendo tiro do servidor e resultado do tiro do cliente e enviando resultado do tiro do servidor
-			clienteAcertou, xServidor, yServidor := cliente.receberTiro()
-			cliente.jogador.TabuleiroAtaque.RegistrarTiro(clienteAcertou, xCliente, yCliente)
-			servidorAcertou := cliente.jogador.TabuleiroDefesa.ReceberTiro(xServidor, yServidor)
+			if iCliente >= 0 && iCliente < batalhanaval.TamanhoTabuleiro && jCliente >= 0 && jCliente < batalhanaval.TamanhoTabuleiro {
+				//Se ainda não atirou na posição pedida pelo usuário, vai fazer normalmente. Se não, não vai deixar ele atirar novamente
+				if cliente.jogador.TabuleiroAtaque.PosicaoDesconhecida(iCliente, jCliente) {
+					mensagemAEnviar = []byte("A " + tiro)
+					cliente.socket.Write(mensagemAEnviar)
 
-			var acertouAEnviar string
-			if servidorAcertou {
-				fmt.Println("Seu oponente fez um tiro certeiro!")
-				acertouAEnviar = "1"
+					//Recebendo tiro do servidor e resultado do tiro do cliente e enviando resultado do tiro do servidor
+					clienteGanhou, clienteAcertou, iServidor, jServidor := cliente.receberTiro()
+					cliente.jogador.TabuleiroAtaque.RegistrarTiro(clienteAcertou, iCliente, jCliente)
+					if clienteGanhou {
+						return //Vai sair do jogo e voltar para o menu principal
+					}
+					tiroServidor := string(byte(iServidor+int('A'))) + strconv.Itoa(jServidor+1)
+					fmt.Println("\nTiro do oponente:", tiroServidor)
+					servidorAcertou := cliente.jogador.TabuleiroDefesa.ReceberTiro(iServidor, jServidor)
+
+					var acertouAEnviar string
+					if servidorAcertou {
+						//vai ver se o servidor ganhou
+						if cliente.jogador.TabuleiroDefesa.AfundouTodos() {
+							fmt.Println("\nSeu oponente fez um tiro certeiro!\n\nVocê perdeu! Não foi desta vez...")
+							return
+						}
+						fmt.Println("\nSeu oponente fez um tiro certeiro!")
+						acertouAEnviar = "1 "
+					} else {
+						fmt.Println("\nSeu oponente fez um tiro na água!")
+						acertouAEnviar = "0 "
+					}
+
+					mensagemAEnviar = []byte("T " + acertouAEnviar + strconv.Itoa(iServidor) + "," + strconv.Itoa(jServidor))
+					cliente.socket.Write(mensagemAEnviar)
+				} else {
+					fmt.Println("\nVocê já tentou este tiro! Por favor, tente um diferente.")
+				}
 			} else {
-				fmt.Println("Seu oponente fez um tiro na água!")
-				acertouAEnviar = "0"
+				fmt.Println("\nPor favor, digite um tiro válido.")
 			}
 
-			mensagemAEnviar = []byte("T " + acertouAEnviar + strconv.Itoa(xServidor) + "," + strconv.Itoa(yServidor))
-			cliente.socket.Write(mensagemAEnviar)
 		case "P":
 			cliente.jogador.ImprimirTabuleiros()
 		case "R":
@@ -173,7 +183,7 @@ func (cliente *Cliente) iniciarJogo() {
 			cliente.receber()
 			return
 		default:
-			fmt.Println("\nPor favor, digite um comando correto")
+			fmt.Println("\nPor favor, digite um comando correto.")
 		}
 	}
 }
@@ -260,4 +270,11 @@ func exibirMenuJogo() {
 		"r - Exibir Regras\n",
 		"s - Sair do jogo\n\n",
 		"Digite sua opção: ")
+}
+
+//Pequena função para zerar o buffer
+func zerarBuffer(array []byte) {
+	for i := 0; i < len(array); i++ {
+		array[i] = 0
+	}
 }
