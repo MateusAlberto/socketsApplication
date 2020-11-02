@@ -95,6 +95,7 @@ func (servidor *Servidor) receber(cliente net.Conn) {
 			cliente.Close()
 			break
 		}
+		fmt.Println(string(mensagem[:tamMensagem]))
 		if tamMensagem > 0 {
 			comando := mensagem[0]
 			switch comando {
@@ -113,6 +114,8 @@ func (servidor *Servidor) receber(cliente net.Conn) {
 					ganhou = servidor.jogos[cliente].TabuleiroDefesa.AfundouTodos()
 				}
 
+				//Se o cliente ganhou, vai enviar para ele apenas o número 1
+				//Se não, vai enviar o número 0, seguido de 0/1 indicando se ele acertou e depois do tiro do servidor
 				if ganhou {
 					mensagemAEnviar = []byte("1")
 				} else {
@@ -126,6 +129,9 @@ func (servidor *Servidor) receber(cliente net.Conn) {
 					mensagemAEnviar = []byte("0 " + acertouAEnviar + strconv.Itoa(iServidor) + "," + strconv.Itoa(jServidor))
 				}
 				cliente.Write(mensagemAEnviar)
+				if ganhou {
+					servidor.encerrarJogo <- cliente
+				}
 			//comando para receber o resultado do tiro do cliente
 			case 'T':
 				acertou := mensagem[2] == '1'

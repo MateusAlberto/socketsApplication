@@ -178,6 +178,37 @@ func pesquisar(dado string) string {
  * valores[2] = 102 (latitude em graus)
  * valores[3] = 50 (longitude em graus)
  */
+//Função que adiciona em um array de strings todos os dados de preços
+//cujas coordenadas estão dentro do círculo delimitado pelo centro e raio passados
+func postosNaRegiao(postos []string, centro *geo.Point, raio int) []string {
+	naRegiao := make([]string, 0)
+	var valores []string
+	var latitude, longitude float64
+	var coordenada *geo.Point
+
+	for _, posto := range postos {
+		valores = strings.Split(posto, " ")
+		latitude, _ = strconv.ParseFloat(strings.ReplaceAll(valores[2], ",", "."), 64)
+		longitude, _ = strconv.ParseFloat(strings.ReplaceAll(valores[3], ",", "."), 64)
+		coordenada = geo.NewPoint(latitude, longitude)
+
+		//Se a distância em quilômetros entre os dois pontos(centro e a coordenada do posto corrente)
+		//for menor que o raio, o posto está na região e será adicionado para o retorno
+		fmt.Println("Distância:", centro.GreatCircleDistance(coordenada))
+		if centro.GreatCircleDistance(coordenada) <= float64(raio) {
+			naRegiao = append(naRegiao, posto)
+		}
+	}
+
+	return naRegiao
+}
+
+/* 59575 2955 102 50
+ * valores[0] = 59575 (identificador)
+ * valores[1] = 2955 (preço combustível x 1000)
+ * valores[2] = 102 (latitude em graus)
+ * valores[3] = 50 (longitude em graus)
+ */
 //Função que recebe os preços para um determinado combustível e calcula o posto
 //com o menor preço dentro da região delimitada pelo centro e raio passados
 func menorPrecoNoRaio(postos []string, centro *geo.Point, raio int) string {
@@ -208,31 +239,6 @@ func menorPrecoNoRaio(postos []string, centro *geo.Point, raio int) string {
 	resp := "\tPreço: " + valores[1] + " (/1000)\n\tLatitude: " + valores[2] + "°\n\tLongitude: " + valores[3] + "°"
 
 	return resp
-}
-
-//Função que adiciona em um array de strings todos os dados de preços
-//cujas coordenadas estão dentro do círculo delimitado pelo centro e raio passados
-func postosNaRegiao(postos []string, centro *geo.Point, raio int) []string {
-	naRegiao := make([]string, 0)
-	var valores []string
-	var latitude, longitude float64
-	var coordenada *geo.Point
-
-	for _, posto := range postos {
-		valores = strings.Split(posto, " ")
-		latitude, _ = strconv.ParseFloat(strings.ReplaceAll(valores[2], ",", "."), 64)
-		longitude, _ = strconv.ParseFloat(strings.ReplaceAll(valores[3], ",", "."), 64)
-		coordenada = geo.NewPoint(latitude, longitude)
-
-		//Se a distância em quilômetros entre os dois pontos(centro e a coordenada do posto corrente)
-		//for menor que o raio, o posto está na região e será adicionado para o retorno
-		fmt.Println("Distância:", centro.GreatCircleDistance(coordenada))
-		if centro.GreatCircleDistance(coordenada) <= float64(raio) {
-			naRegiao = append(naRegiao, posto)
-		}
-	}
-
-	return naRegiao
 }
 
 //Pequena função para zerar o buffer

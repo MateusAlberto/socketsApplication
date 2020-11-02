@@ -29,12 +29,13 @@ func (jogador *JogadorBot) IniciarJogador() {
 //tem 20% de chance de realizar um tiro completamente aleatório
 //ou então de realizar um tiro próximo do tiro anterior
 func (jogador *JogadorBot) Tiro() (int, int) {
+	atirou := false
 	i := jogador.UltimoTiroCerteiro[0]
 	j := jogador.UltimoTiroCerteiro[1]
 	seed := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(seed)
 	aleatorio := random.Intn(100)
-	//tem 50% de chande de gerar uma coordenada aleatória ou um tiro
+	//tem 20% de chande de gerar uma coordenada aleatória ou um tiro
 	if aleatorio < 20 {
 		for jogador.TabuleiroAtaque.tabuleiro[i][j] != '-' {
 			seed = rand.NewSource(time.Now().UnixNano())
@@ -44,8 +45,9 @@ func (jogador *JogadorBot) Tiro() (int, int) {
 			random = rand.New(seed)
 			j = random.Intn(TamanhoTabuleiro)
 		}
+		atirou = true
 	} else {
-		atirou := false
+		atirou = false
 		for distancia := 1; !atirou && distancia < TamanhoTabuleiro; distancia++ {
 			switch { //switch vazio equivale a vários if-else aninhados
 			//Tentar à esquerda
@@ -68,6 +70,18 @@ func (jogador *JogadorBot) Tiro() (int, int) {
 				atirou = false
 			}
 		}
+	}
+
+	if !atirou {
+		for jogador.TabuleiroAtaque.tabuleiro[i][j] != '-' {
+			seed = rand.NewSource(time.Now().UnixNano())
+			random = rand.New(seed)
+			i = random.Intn(TamanhoTabuleiro)
+			seed = rand.NewSource(time.Now().UnixNano())
+			random = rand.New(seed)
+			j = random.Intn(TamanhoTabuleiro)
+		}
+		atirou = true
 	}
 
 	return i, j

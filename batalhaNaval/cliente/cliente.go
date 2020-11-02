@@ -234,7 +234,7 @@ func exibirMenuPrincipal() {
 }
 
 func exibirRegras() {
-	fmt.Print("\nBatalha Naval é um jogo no qual dois jogadores posicionam 10 navios em um tabuleiro 10x10 e, em seguida, revesam turnos para atirarem com o objetivo de afundar um navio do oponente.\n",
+	fmt.Print("\nBatalha Naval é um jogo no qual dois jogadores posicionam 10 navios em um tabuleiro 10x10 e, em seguida, revezam turnos para atirarem com o objetivo de afundar um navio do oponente.\n",
 		"Os navios são os seguintes:\n",
 		"  - 1 porta-aviões que ocupa 5 posições\n",
 		"  - 2 navios-tanque que ocupam 4 posições\n",
